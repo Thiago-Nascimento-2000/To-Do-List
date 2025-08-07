@@ -7,7 +7,7 @@ type ModelProps = {
 export function Modal({ open, onClose, children }: ModelProps) {
     return (
         <div
-            className={`fixed flex justify-center items_center
+            className={`fixed flex justify-center items_center z-2
             ${open ? "visible" : "invisible"}`}>
 
             <div

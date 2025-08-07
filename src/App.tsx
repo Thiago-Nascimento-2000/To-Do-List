@@ -7,22 +7,33 @@ import { AiOutlinePushpin } from "react-icons/ai";
 import { v4 as uuid } from "uuid";
 import { PiTrash } from "react-icons/pi";
 import { FaCheck } from "react-icons/fa";
+import { Header } from "./components/Header";
 
 
 export default function App() {
   const [open, setOpen] = useState(false);
+  const [input, setInput] = useState('');
+  const [tarefa, setTarefa] = useState<Tarefas[]>(() => {
+    const tarefaStorage = localStorage.getItem('tarefa');
+    return tarefaStorage ? JSON.parse(tarefaStorage) : [];
+  });
+  const [itensPorPagina, setItensPorPagina] = useState(5);
+  const [paginaAtual, setPaginaAtual] = useState(0);
+
+  const paginas = Math.ceil(tarefa.length / itensPorPagina);
+  const InicioIndex = paginaAtual * itensPorPagina;
+  const FimIndex = InicioIndex + itensPorPagina;
+  const ItensAtual = tarefa.slice(InicioIndex, FimIndex);
+
+  useEffect(() => {
+    setPaginaAtual(0);
+  },[itensPorPagina])
 
   type Tarefas = {
     id: string;
     nomeTarefa: string;
     concluido: boolean;
   }
-
-  const [input, setInput] = useState('');
-  const [tarefa, setTarefa] = useState<Tarefas[]>(() => {
-    const tarefaStorage = localStorage.getItem('tarefa');
-    return tarefaStorage ? JSON.parse(tarefaStorage) : [];
-  });
 
   const adicionarTarefa = () => {
     const id = uuid();
@@ -50,34 +61,38 @@ export default function App() {
   }, [tarefa]);
 
   return (
-    <main className="relative flex justify-center items-center flex-col h-screen bg-gray-200 overflow-hidden">
-      <div className="bg-blue-600 w-12/12 h-fit flex flex-col items-center justify-center p-5 rounded-b-4xl">
-        <h1 className="w-8/12 m-5 text-white font-semibold text-2xl">To do List</h1>
-        <nav className="bg-white/30 rounded-full w-8/12">
-          <ul className="flex justify-between items-center mr-10">
-            <li className="text-blue-500 font-semibold bg-white rounded-full p-3 pl-10 pr-10"><a href="#">Todas Tarefas</a></li>
-            <li className="text-white/70"><a href="#">Nova</a></li>
-            <li className="text-white/70"><a href="#">Aprovado</a></li>
-            <li className="text-white/70"><a href="#">Nova Lista</a></li>
-            <li className="text-white/70"><a href="#">Carregado</a></li>
-          </ul>
-        </nav>
+    <main className="flex items-center flex-col h-full">
+      <Header/>
+
+      <div className="flex justify-between w-6/12 z-2">
+        <span className="font-semibold text-2xl text-blue-600 pt-10 pb-2">
+          {`Suas tarefas: ${tarefa.length},`}
+          &nbsp;&nbsp;
+          {`Concluidas: 5,`}
+          &nbsp;&nbsp;
+          {`Pendentes: 7.`}
+          </span>
+        <span
+          className="text-blue-600 flex items-center pt-10">Mostrar&nbsp;
+          <select className="cursor-pointer" value={itensPorPagina} onChange={(e) => setItensPorPagina(Number(e.target.value))}>
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={15}>15</option>
+            <option value={20}>20</option>
+          </select>
+          &nbsp;&nbsp;itens
+        </span>
       </div>
 
-      <div className="flex justify-between w-6/12">
-        <span className="font-semibold text-2xl text-white pt-10 pb-2">Suas tarefas</span>
-        <span className="text-white flex items-center pt-10">Mostrar 5 itens <MdKeyboardArrowDown /></span>
-      </div>
-
-      {tarefa.map((task) => (
-        <span key={task.id} className="w-full flex m-2 justify-center">
+      {ItensAtual.map((task) => (
+        <span key={task.id} className="w-full flex m-2 justify-center z-2">
 
           <div className="flex w-6/12">
 
             <div className={`w-2 h-15 rounded-l-sm ${task.concluido ? 'bg-green-500' : 'bg-red-500'}
-`}/>
+`} />
             <div className="bg-white w-full h-15 rounded-r-sm flex items-center justify-between pr-5 pl-5 shadow-[0px_4px_6px_0px_rgba(0,_0,_0,_0.1)]">
-              <p style={{textDecoration: task.concluido ? 'line-through' : 'none', cursor: 'pointer' }}>{task.nomeTarefa}</p>
+              <p style={{ textDecoration: task.concluido ? 'line-through' : 'none', cursor: 'pointer' }}>{task.nomeTarefa}</p>
               <div className="flex gap-3">
                 <FaCheck size={22} onClick={() => concluirTarefa(task.id)} className="text-green-500 hover:cursor-pointer hover:scale-105" />
                 <PiTrash size={25} onClick={() => removerTarefa(task.id)} className="hover:cursor-pointer hover:scale-105 text-red-700" />
@@ -114,6 +129,19 @@ export default function App() {
           </button>
         </div>
       </Modal>
+
+      <div className="flex gap-2 z-2">
+        {Array.from(Array(paginas), (item, index) => {
+          return (
+            <button
+              className={`hover:cursor-pointer w-8 h-8 text-white rounded-full
+              flex items-center justify-center mt-5 mb-5 ${paginaAtual === index ? 'bg-blue-800 text-white' : 'bg-blue-600'}`}
+              value={index}
+              onClick={(e) => setPaginaAtual(Number(e.currentTarget.value))}>{index + 1}
+            </button>
+          )
+        })}
+      </div>
 
       <NewTask
         onClick={() => setOpen(true)}>
