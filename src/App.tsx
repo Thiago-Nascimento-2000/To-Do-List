@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
+import { v4 as uuid } from "uuid";
+
 import { Modal } from "./components/Modal";
 import { NewTask } from "./components/NewTask";
-import { HiMiniPlus } from "react-icons/hi2";
-import { MdKeyboardArrowDown, MdOutlineCancel } from "react-icons/md";
-import { AiOutlinePushpin } from "react-icons/ai";
-import { v4 as uuid } from "uuid";
+import { Header } from "./components/Header";
+import { Paginacao } from "./components/Paginacao";
+import { QuantidadeItensPorPagina } from "./components/QuantidadeItensPorPagina";
+
 import { PiTrash } from "react-icons/pi";
 import { FaCheck } from "react-icons/fa";
-import { Header } from "./components/Header";
+import { HiMiniPlus } from "react-icons/hi2";
+import { MdOutlineCancel } from "react-icons/md";
+import { AiOutlinePushpin } from "react-icons/ai";
 
 
 export default function App() {
@@ -27,7 +31,7 @@ export default function App() {
 
   useEffect(() => {
     setPaginaAtual(0);
-  },[itensPorPagina])
+  }, [itensPorPagina])
 
   type Tarefas = {
     id: string;
@@ -62,26 +66,17 @@ export default function App() {
 
   return (
     <main className="flex items-center flex-col h-full">
-      <Header/>
+      <Header />
 
       <div className="flex justify-between w-6/12 z-2">
         <span className="font-semibold text-2xl text-blue-600 pt-10 pb-2">
           {`Suas tarefas: ${tarefa.length},`}
           &nbsp;&nbsp;
-          {`Concluidas: 5,`}
+          {`Concluidas: ${tarefa.filter(task => task.concluido).length},`}
           &nbsp;&nbsp;
-          {`Pendentes: 7.`}
-          </span>
-        <span
-          className="text-blue-600 flex items-center pt-10">Mostrar&nbsp;
-          <select className="cursor-pointer" value={itensPorPagina} onChange={(e) => setItensPorPagina(Number(e.target.value))}>
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={15}>15</option>
-            <option value={20}>20</option>
-          </select>
-          &nbsp;&nbsp;itens
+          {`Pendentes: ${tarefa.filter(task => !task.concluido).length}.`}
         </span>
+      <QuantidadeItensPorPagina itensPorPagina={itensPorPagina} setItensPorPagina={setItensPorPagina}/>
       </div>
 
       {ItensAtual.map((task) => (
@@ -109,39 +104,28 @@ export default function App() {
         <div className="w-full flex justify-end items-end p-2">
           <button
             onClick={() => setOpen(false)}
-            className="text-white font-semibold p-2 hover:cursor-pointer">
-            <MdOutlineCancel size={25} />
+            className="text-white font-semibold hover:cursor-pointer">
+            <MdOutlineCancel size={25} className="text-red-500 hover:text-red-700"/>
           </button>
         </div>
-
-        <div className="flex-1 flex items-start">
+        <h1 className="text-white font-semibold text-2xl mb-5">Descreva sua Tarefa</h1>
+        <div className="flex items-start">
           <input
             placeholder="Nova Task"
             type="text"
             value={input}
             onChange={(e) => { setInput(e.target.value) }}
-            className="bg-white rounded-l-xl p-1 border-none">
+            className="bg-white rounded-l-xl border-none p-2">
           </input>
           <button
             onClick={() => adicionarTarefa()}
-            className="bg-white rounded-r-xl p-1 hover:cursor-pointer">
+            className="bg-white rounded-r-xl p-2 hover:cursor-pointer mb-10">
             <AiOutlinePushpin size={24} />
           </button>
         </div>
       </Modal>
 
-      <div className="flex gap-2 z-2">
-        {Array.from(Array(paginas), (item, index) => {
-          return (
-            <button
-              className={`hover:cursor-pointer w-8 h-8 text-white rounded-full
-              flex items-center justify-center mt-5 mb-5 ${paginaAtual === index ? 'bg-blue-800 text-white' : 'bg-blue-600'}`}
-              value={index}
-              onClick={(e) => setPaginaAtual(Number(e.currentTarget.value))}>{index + 1}
-            </button>
-          )
-        })}
-      </div>
+      <Paginacao paginas={paginas} setPaginaAtual={setPaginaAtual}/>
 
       <NewTask
         onClick={() => setOpen(true)}>

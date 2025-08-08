@@ -9,7 +9,7 @@ export function NewTask({ onClick, children }: NewTaskProps) {
             <div
                 className="
                     w-15 h-15 flex justify-center items-center bg-blue-800 rounded-full text-white
-                    hover:bg-blue-700 hover:cursor-pointer z-1"
+                    hover:bg-blue-700 hover:cursor-pointer z-1 transition-all"
                 onClick={onClick}>
                 {children}
             </div>
